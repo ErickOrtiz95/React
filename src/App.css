@@ -1,0 +1,48 @@
+import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import { Card, Button, Container, Row, Col } from "react-bootstrap";
+
+function ListaProductos({ agregarAlCarrito }) {
+    const [productos, setProductos] = useState([]);
+    const [cargando, setCargando] = useState(true);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        async function obtenerProductos() {
+            try {
+                const respuesta = await fetch("https://fakestoreapi.com/products");
+                if (!respuesta.ok) throw new Error("Error al obtener productos");
+                const datos = await respuesta.json();
+                setProductos(datos);
+            } catch (err) {
+                setError(err.message);
+            } finally {
+                setCargando(false);
+            }
+        }
+
+        obtenerProductos();
+    }, []);
+
+    if (cargando) return <p>Cargando productos...</p>;
+    if (error) return <p>Error: {error}</p>;
+
+    return (
+        <Container className="mt-4">
+            <Row>
+                {productos.map(producto => (
+                    <Col key={producto.id} md={4}>
+                        <Card>
+                            <Card.Body>
+                                <Card.Title>{producto.title}</Card.Title>
+                                <Button as={Link} to={`/producto/${producto.id}`} variant="info">Ver detalles</Button>
+                            </Card.Body>
+                        </Card>
+                    </Col>
+                ))}
+            </Row>
+        </Container>
+    );
+}
+
+export default ListaProductos;
